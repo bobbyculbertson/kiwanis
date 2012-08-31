@@ -1,0 +1,27 @@
+
+body {
+	margin: 0;
+	padding: 0;
+	background: #0c356b;
+}
+.clear {
+	clear: both;
+}
+#wrapper {
+	width: 900px;
+	margin: 0 auto;
+	background: #ffffff;
+	margin-top: 10px;
+}
+header {
+	margin-bottom: 20px;
+}
+header ul li {
+	list-style-type: none;
+	float: left;
+}
+
+form {
+	border-bottom:1px solid black;
+	border-top:1px solid black;
+}
