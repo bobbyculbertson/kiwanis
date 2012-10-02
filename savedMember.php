@@ -1,6 +1,7 @@
 <?php
-require_once 'functions.php';
 
+require_once 'header.php';
+require_once 'class.php';
 
 if (isset($_POST['validation2'])) {
 	$newFirstName = strip_tags(trim($_POST['newFirstName']));
@@ -9,9 +10,10 @@ if (isset($_POST['validation2'])) {
 	$newPhone = strip_tags(trim($_POST['newPhone']));
 	$newEmail = strip_tags(trim($_POST['newEmail']));
 	$newCurrent = strip_tags(trim($_POST['newCurrent']));
+	$obj = new Members();
+	$results = $obj->setMember($newFirstName, $newLastName, $newAddress, $newPhone, $newEmail, $newCurrent, $_SESSION['editID']);
 
-	$editResults = editMember($newFirstName, $newLastName, $newAddress, $newPhone, $newEmail, $newCurrent, $_SESSION['editID']);
-	echo $editResults;
+	echo $results;
 	echo "<br><a href='admin.php'>Return to Admin Page</a>";
 } else {
 	echo "not working";

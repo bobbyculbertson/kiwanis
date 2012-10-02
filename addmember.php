@@ -1,9 +1,10 @@
 <?php
 $title = "Add Member";
 require_once 'header.php';
+require_once 'class.php';
 
 ?>
-<p><a href="admin.php">Back to Admin Section</a></p>
+<h2>Add Member Form</h2>
 <form method="post" action="addmember.php">
 	<table>
 		<tr>
@@ -36,12 +37,14 @@ require_once 'header.php';
 
 <?php 
 if (isset($_POST['FirstName'])){
-	$firstName = trim($_POST['FirstName']);
-	$lastName = trim($_POST['LastName']);
-	$address = trim($_POST['address']);
-	$phone = trim($_POST['phone']);
-	$email = trim($_POST['email']);
-	addMember($firstName, $lastName, $address, $phone, $email);
+	$firstName = strip_tags(trim($_POST['FirstName']));
+	$lastName = strip_tags(trim($_POST['LastName']));
+	$address = strip_tags(trim($_POST['address']));
+	$phone = strip_tags(trim($_POST['phone']));
+	$email = strip_tags(trim($_POST['email']));
+	$obj = new Members();
+	$results = $obj->setNewMember($firstName, $lastName, $address, $phone, $email);
+	echo $results;
 }
 
 ?>

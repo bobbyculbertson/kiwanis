@@ -1,60 +1,43 @@
 <?php
-require_once 'functions.php';
+$title="Admin Page";
+require_once 'header.php';
+require_once 'class.php';
 ?>
-
-<?php 
-if (isset($_POST['validation'])) {
-	$startDate = trim($_POST['startDate']);
-	$endDate = trim($_POST['endDate']);
-	$memberID = trim($_POST['member']);
-	
-	$accountSummary = accountSummary($startDate, $endDate, $memberID);
-	$memberDetail = memberInfo($memberID);
-	$memberInfo = $memberDetail->fetch_array();
-	$firstName=$memberInfo['FirstName'];
-	$lastName=$memberInfo['LastName'];
-	
+<h2>Create Bill</h2>
+<form method="post" action="memberbill.php">
+<table>
+<tr>
+<td>Range for Account Summary</td>
+</tr>
+<tr>
+<td>Start Date</td>
+<td><input type="date" name="startDate"></td>
+</tr>
+<tr>
+<td>End Date</td>
+<td><input type="date" name="endDate"></td>
+</tr>
+<tr>
+<td>Choose Member</td>
+<td><select name="member" id="member2">
+<option selected="selected"></option>
+<?php
+	$obj = new Members();
+	$results = $obj->getCurrentMembers();
+	foreach($results as $result){
+		echo '<option value="'.$result['id'].'">'.$result['LastName'].', '.$result['FirstName'].'</option>';
 	}
-
 ?>
-
-
-<h2>Morris Kiwanis Member Bill</h2>
-<h4><?php echo $firstName." ".$lastName?></h4>
-<h5>Invoice Date: <?php echo date("m.d.y");?></h5>
+			</select></td>
+		</tr>
+		<tr>
+			<td><input type="hidden" name="validation"><input type="submit" name="choice" value="Create Bill"></td>
+		</tr>
+		
+	</table>
 	
+</form>
 
-<br><br><br>
-<p>Account Summary from: <?php echo "$startDate to $endDate"?></p>
-<table>
-	<tr>
-		<td style="width:120px"><strong>Date</strong></td>
-		<td style="width:80px"><strong>Amount</strong></td>
-		<td><strong>Comments</strong></td>
-	</tr>
-	<?php 
-		while ($rows=$accountSummary->fetch_array()){
-			echo "<tr>";
-			echo "<td>".$rows['date']."</td>";
-			echo "<td>".$rows['amount']."</td>";
-			echo "<td>".$rows['comments']."</td>";
-			echo "</tr>";
-		}
-	?>
 
-</table>
-<br><br>
-<table>
-	<tr>
-		<td>Total Amount Due</td>
-		<td></td>
-		<?php 
-		$totalBalance = accountBalance($memberID);
-		echo "<td><strong>$$totalBalance</strong></td>";
-		?>
-	</tr>
-</table>
 
-<br>
-<p>Please make checks payable to:</p>
-<p>Morris Kiwanis<br>P.O. Box 173<br>Morris MN 56267</p>
+

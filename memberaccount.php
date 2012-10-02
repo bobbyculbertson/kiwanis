@@ -1,9 +1,9 @@
 <?php 
 $title = "Member Account";
 require_once 'header.php';
+require_once 'class.php';
 ?>
-<p>
-<a href="admin.php">Back to Admin Page</a></p>
+<h2>Member Account Records</h2>
 <form method="post" action="memberaccount.php">
 	<table>
 		<tr>
@@ -11,12 +11,12 @@ require_once 'header.php';
 			<td><select name="member" id="member2">
 					<option selected="selected"></option>
 					<?php 
-					$result = memberComboCurrent();
-					
-					while ($row = $result->fetch_array()){
-						echo '<option value="'.$row['id'].'">'.$row['LastName'].', '.$row['FirstName'].'</option>';
+					$obj = new Members();
+					$results = $obj->getCurrentMembers();
+					foreach($results as $result){
+						echo '<option value="'.$result['id'].'">'.$result['LastName'].', '.$result['FirstName'].'</option>';
 					}
-				
+
 					?>
 					
 			</select></td>
@@ -64,7 +64,8 @@ if (isset($_POST['date'])){
 	if ($type=="credit") {
 		$amount = -1*$amount;
 	}
-	addAmount($memberID, $date, $amount, $comments);
+	$AccountsObj = new Accounts();
+	$AccountsObj->setAmount($date, $memberID, $amount, $comments);
 	}
 }
 

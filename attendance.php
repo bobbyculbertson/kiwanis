@@ -1,71 +1,61 @@
-<?php 
+<?php
 $title = "Attendance";
 require_once 'header.php';
+require_once 'class.php';
 ?>
 
-
-<p><a href="admin.php">Back to Admin Section</a></p>
+<h2>Attendance Form</h2>
 <form method="post" action="attendance.php">
-<table>
+	<table>
+		<tr>
+		<td>Date:</td>
+		<td><input type="date" name="date"></td>
+		</tr>
+		<?php 
+		$obj = new Members();
+		$results = $obj->getCurrentMembers();
+		foreach ($results as $result){
+			$checkbox = 'checkbox'.$result['id'];
+			echo '<tr>';
+			echo '<td>'.$result['LastName'].', '.$result['FirstName'].'</td>';
+			echo "<td><input type='checkbox' name=$checkbox value='yes'></td>";
+			echo '</tr>';
+		}
+		$obj = null;
+		?>
 	<tr>
-		<td>Member</td>
-		<td>
-			<select name="members" id="members2">
-				<option selected="selected"></option>
-				<?php
-				$result = memberComboCurrent();
-				while($row = $result->fetch_array())
-				{
-					echo '<option value="'.$row['id'].'">'.$row['LastName'].', '.$row['FirstName'].'</option>';
-				}
-				?>
-			</select>
-		</td>
+		<td><input type="submit" name="submit" value="Submit Attendance"></td>
+		<td><a href="admin.php"><input type="button" value="Cancel"></a>
 	</tr>
-	<tr>
-		<td>Date</td>
-		<td><input type="date" name="dateOfVisit"></td>
-	</tr>
-	<tr>
-		<td>Attenders</td>
-		<td><input type="text" name="attendance" value="1"></td>
-	</tr>
-	<tr>
-		<td>Comments</td>
-		<td><input type="text" name="comments"></td>
-	</tr>
-	<tr>
-		<td><input type="submit" value="Add Record"></td>
-<!-- 		<td><a href="index.php"><input type="button" value="Cancel"></a></td> -->
-	</tr>
-</table>
+		<input type="hidden" name="validate">	
+	</table>
+
+
 </form>
+
+
 <?php 
-if (isset($_POST['dateOfVisit'])) {
-	if (($_POST['dateOfVisit']=="") || ($_POST['attendance']=="") || ($_POST['members']=="")){
-		echo "Please fill entire form";
+if(isset($_POST['validate'])){
+	if($_POST['date']==''){
+		echo 'Please enter a date';
 	} else {
-		$date = $_POST['dateOfVisit'];
-		$visit = $_POST['attendance'];
-		$memberID = $_POST['members'];
-		$comments = $_POST['comments'];
-		addVisit($memberID, $date, $visit, $comments);
-	}
-} 
+		$obj2 = new Visits();
+		$count = 0;
+		foreach ($results as $test){
+			$var = 'checkbox'.$test['id'];
+			if($_POST[$var]=='yes'){
+				$date = $_POST['date'];
+				$memberID = $test['id'];
+				$conclusion = $obj2->setVisit($date, $memberID, 1, '');
+				$count += 1;
+				$conclusion = null;
+			}
+		}
+	} echo "Successfully added $count attendance records";
+}
 
+$results = null;
+$result = null;
+$test = null;
+$count = null;
 ?>
-</body>
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-

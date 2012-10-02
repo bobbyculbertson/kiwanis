@@ -1,16 +1,17 @@
 <?php 
 $title = "Edit Member";
 require_once 'header.php';
+require_once 'class.php';
 ?>
-<p>
-<a href="admin.php"> Back to Admin Page</a></p>
+<h2>Edit Member Form</h2>
 <form method="post" action="editmember.php">
 <select name="member" id="member">
 	<option selected="selected"></option>
 	<?php
-	$results = memberComboAll();
-	while ($row = $results->fetch_array()) {
-		echo '<option value="'.$row['id'].'">'.$row['LastName'].', '.$row['FirstName'].'</option>';
+	$obj = new Members();
+	$results = $obj->getMembersAll();
+	foreach($results as $result){
+		echo '<option value="'.$result['id'].'">'.$result['LastName'].', '.$result['FirstName'].'</option>';
 	}
 	?>
 </select>
@@ -25,8 +26,8 @@ require_once 'header.php';
 if (isset($_POST['validation'])) {
 	$memberID = $_POST['member'];
 	$_SESSION['editID'] = $memberID;
-	$memberDetails = memberInfo($memberID);
-	while ($member = $memberDetails->fetch_array()) {
+	$members = $obj->memberInfo($memberID);
+	foreach ($members as $member){
 		echo "<form method='post' action='savedMember.php'>";
 		echo "<table>";
 		echo "<tr>";
