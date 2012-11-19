@@ -1,4 +1,5 @@
 <?php 
+//Title variable passed to header to give page a Title
 $title = "Member Account";
 require_once 'header.php';
 require_once 'class.php';
@@ -18,7 +19,6 @@ require_once 'class.php';
 					}
 
 					?>
-					
 			</select></td>
 		</tr>
 		<tr>
@@ -53,22 +53,42 @@ require_once 'class.php';
 
 <?php 
 if (isset($_POST['date'])){
+	//Validates that entire form is filled out
 	if (($_POST['member'])=="" || ($_POST['date']=="") ||($_POST['amount']=="") ||($_POST['type']=="")) {
 		echo 'Please fill out entire form';
 	} else {
-	$memberID = $_POST['member'];
-	$date = trim($_POST['date']);
-	$type = $_POST['type'];
-	$amount = $_POST['amount'];
-	$comments = $_POST['comments'];
-	if ($type=="credit") {
-		$amount = -1*$amount;
-	}
-	$AccountsObj = new Accounts();
-	$AccountsObj->setAmount($date, $memberID, $amount, $comments);
+		//Sets variables
+		$memberID = $_POST['member'];
+		$date = $_POST['date'];
+		$type = $_POST['type'];
+		$amount = strip_tags(trim($_POST['amount']));
+		$comments = strip_tags(trim($_POST['comments']));
+		//Test to confirm Amount is a number
+		if(!is_numeric($amount)){
+			echo "Please enter a valid number for amount";
+		} else {
+			//If amount is a credit, changes it to a negative number to subtract
+			//from running total
+			if ($type=="credit") {
+				$amount = -1*$amount;
+			}
+			$AccountsObj = new Accounts();
+			$conclusion = $AccountsObj->setAmount($date, $memberID, $amount, $comments);
+			if(!$conclusion){
+				echo 'Error. Please Try Again';
+			} else {
+				echo 'Record Added Successfully';
+			}
+		}
 	}
 }
-
+$memberID = null;
+$date = null;
+$type = null;
+$amount = null;
+$comments = null;
+$AccountsObj = null;
+$conclusion = null;
 ?>
 
 </body>

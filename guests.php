@@ -1,4 +1,6 @@
 <?php
+//Title variable passed to header to give page a Title
+$title = "Guests";
 require_once 'header.php';
 require_once 'class.php';
 ?>
@@ -47,13 +49,16 @@ require_once 'class.php';
 </form>
 
 <?php 
+//Requires that Date and Type are selected
 if(isset($_POST['date']) && isset($_POST['type'])){
+	//Validates that if Guest of Member is selected, 
+	//that a Member to Bill is also selected
 	if($_POST['type']==1 && !$_POST['memberBill']){
 		echo "Please Select a Member to Bill";
 	} else {
+		//Sets variables
 		$date = $_POST['date'];
 		$type = $_POST['type'];
-		
 		if(!$_POST['memberBill']){
 			$memberToBill = 0;
 		} else {

@@ -1,11 +1,14 @@
 <?php
+//Title variable passed to header to give page a Title
+$title = "Account Summary";
+require_once 'header.php';
 require_once 'class.php';
 ?>
 
 <?php 
-if (isset($_POST['validation'])) {
-	$startDate = strip_tags(trim($_POST['startDate']));
-	$endDate = strip_tags(trim($_POST['endDate']));
+if (isset($_POST['validation-summary'])) {
+	$startDate = '1970-01-01';
+	$endDate = date("Y-m-d");
 	$memberID = strip_tags(trim($_POST['member']));
 	$AccountObj = new Accounts();
 	$MemberObj = new Members();
@@ -20,13 +23,22 @@ if (isset($_POST['validation'])) {
 ?>
 
 
-<h2>Morris Kiwanis Member Bill</h2>
+<h3>Account Summary</h3>
 <h4><?php echo $firstName." ".$lastName?></h4>
-<h5>Invoice Date: <?php echo date("m.d.y");?></h5>
+<table>
+	<tr>
+		<td><h3>Total Amount Due</h3></td>
+		<td></td>
+		<?php 
+		$Balance = $AccountObj->getAccountBalance($memberID);
+		$totalBalance = $Balance[0]['balance'];
+		echo "<td><strong><h3>$$totalBalance</h3></strong></td>";
+		?>
+	</tr>
+</table>
 	
-
-<br><br><br>
 <p>Account Summary from: <?php echo "$startDate to $endDate"?></p>
+
 <table>
 	<tr>
 		<td style="width:120px"><strong>Date</strong></td>
@@ -42,21 +54,7 @@ if (isset($_POST['validation'])) {
 			echo "</tr>";
 		}
 	?>
-
 </table>
-<br><br>
-<table>
-	<tr>
-		<td>Total Amount Due</td>
-		<td></td>
-		<?php 
-		$Balance = $AccountObj->getAccountBalance($memberID);
-		$totalBalance = $Balance[0]['balance'];
-		echo "<td><strong>$$totalBalance</strong></td>";
-		?>
-	</tr>
-</table>
-
 <br>
-<p>Please make checks payable to:</p>
-<p>Morris Kiwanis<br>P.O. Box 173<br>Morris MN 56267</p>
+
+

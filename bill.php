@@ -1,8 +1,11 @@
 <?php
+//Title variable passed to header to give page a Title
 $title="Admin Page";
 require_once 'header.php';
 require_once 'class.php';
 ?>
+<!-- Form variables get sent to memberbill.php
+This allows for that bill to be its own separate page -->
 <h2>Create Bill</h2>
 <form method="post" action="memberbill.php">
 <table>
@@ -22,6 +25,7 @@ require_once 'class.php';
 <td><select name="member" id="member2">
 <option selected="selected"></option>
 <?php
+	//Builds Combo box of Current Members
 	$obj = new Members();
 	$results = $obj->getCurrentMembers();
 	foreach($results as $result){

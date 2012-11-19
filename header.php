@@ -2,7 +2,7 @@
 session_start();
 ?>
 
-<!DOCTYPE = html>
+<!DOCTYPE html>
 <html>
 <head>
 <title><?php echo $title?></title>
@@ -19,6 +19,7 @@ session_start();
 						<ul>
 							<li><a href="addmember.php">Add</a></li>
 							<li><a href="editmember.php">Edit</a></li>
+							<li><a href="deletemember.php">Delete</a></li>
 						</ul>
 					</li>
 					<li>Attendance
@@ -30,6 +31,11 @@ session_start();
 					<li><a href="memberaccount.php">Accounts</a></li>
 					<li><a href="dues.php">Dues</a></li>
 					<li><a href="bill.php">Bills</a></li>
+					<li><a href="admin.php">Admin</a>
+						<ul>
+							<li><a href="delete.php">Delete Records</a></li>
+						</ul>
+					</li>
 				</ul>
 			</nav>
 	</header>

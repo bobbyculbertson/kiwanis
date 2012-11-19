@@ -1,4 +1,5 @@
 <?php
+//Title variable passed to header to give page a Title
 $title = "Attendance";
 require_once 'header.php';
 require_once 'class.php';
@@ -12,6 +13,7 @@ require_once 'class.php';
 		<td><input type="date" name="date"></td>
 		</tr>
 		<?php 
+		//Creates ComboBox of Current Members
 		$obj = new Members();
 		$results = $obj->getCurrentMembers();
 		foreach ($results as $result){
@@ -36,10 +38,12 @@ require_once 'class.php';
 
 <?php 
 if(isset($_POST['validate'])){
+	//Checks to make sure a Date has been entered
 	if($_POST['date']==''){
 		echo 'Please enter a date';
 	} else {
 		$obj2 = new Visits();
+		//Sets counter for number in attendance to 0
 		$count = 0;
 		foreach ($results as $test){
 			$var = 'checkbox'.$test['id'];
@@ -50,8 +54,8 @@ if(isset($_POST['validate'])){
 				$count += 1;
 				$conclusion = null;
 			}
-		}
-	} echo "Successfully added $count attendance records";
+		}echo "Successfully added $count attendance records";
+	} 
 }
 
 $results = null;

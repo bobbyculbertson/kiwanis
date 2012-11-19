@@ -1,8 +1,9 @@
 <?php 
 class GoldenGate {
+	//Builds connection to database
 	public $connection;
 	public function getCredentials(){
-		$arr = parse_ini_file('configdb.ini');
+		$arr = parse_ini_file('goldenGate.ini');
 
 		try {
 			$this->connection = new PDO($arr['dsn'], $arr['user'], $arr['pass']);
@@ -11,6 +12,37 @@ class GoldenGate {
 			echo 'Connection Failed :'.$e->getMessage().PHP_EOL;
 			echo 'Please contact the application administrator';
 		}
+	}
+}
+
+class Dues extends GoldenGate {
+	public function getVariables() {
+		parent::getCredentials();
+		$sql = "SELECT * FROM variable";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute();
+		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
+			$var['price']=$results[0]['value'];
+			$var['quarter']=$results[1]['value'];
+			$var['membership']=$results[2]['value'];
+			return $var;
+		} else {
+			echo 'No Results';
+		}
+	}
+	public function setVariables($value, $id) {
+		parent::getCredentials();
+		$sql = "UPDATE variable SET value=:value WHERE id=:id";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute(array(':value'=>$value, ':id'=>$id));
+		if(!$results) {
+			$message = 'Error occurred. Please try again.';
+		} else {
+			$message = 'Success';
+		} return $message;
+	}
+	function __destruct(){
+		$this->connection=null;
 	}
 }
 
@@ -74,6 +106,18 @@ class Members extends GoldenGate {
 			$message = 'Success';
 		} return $message;
 	}
+	public function deleteMember($memberDeleteID) {
+		parent::getCredentials();
+		$sql = "DELETE FROM members WHERE id=$memberDeleteID";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute();
+		if(!$results){
+			$message = "Record Not Deleted";
+		} else {
+			$message = 'Success';
+		}
+		return $message;
+	}
 	function __destruct(){
 		$this->connection=null;
 	}
@@ -95,7 +139,7 @@ class Visits extends GoldenGate {
 	}
 	public function getSumVisits($startDate, $endDate){
 		parent::getCredentials();
-		$sql = "SELECT SUM(v.visits) AS QtrVisits, m.FirstName
+		$sql = "SELECT SUM(v.visits) AS QtrVisits, m.FirstName, m.LastName
 		FROM visits v JOIN members m
 		ON (v.memberID = m.id)
 		WHERE v.date >= :startDate AND
@@ -103,17 +147,71 @@ class Visits extends GoldenGate {
 		GROUP BY m.FirstName
 		ORDER BY m.Firstname";
 		$stm = $this->connection->prepare($sql);
-		$results = $stm->execut(array(':startDate'=>$startDate, ':endDate'=>$endDate));
+		$results = $stm->execute(array(':startDate'=>$startDate, ':endDate'=>$endDate));
 		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
 			return $results;
 		} else {
 			echo 'No Results';
 		}
 	}
+	
+	public function getVisits($startDate, $endDate) {
+		parent::getCredentials();
+		$sql = "SELECT v.id, v.date, v.visits, m.FirstName, m.LastName
+				FROM visits v
+					JOIN members m ON (m.id=v.memberID)
+				WHERE date >= :startDate AND date <= :endDate
+				ORDER BY v.date DESC, m.FirstName";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute(array(':startDate' => $startDate, ':endDate'=>$endDate));
+		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
+			return $results;
+		} else {
+			echo 'No Results';
+		}
+	}
+	public function selectVisits($visitDeleteID) {
+		parent::getCredentials();
+		$sql = "SELECT v.id, v.date, v.visits, m.FirstName, m.LastName
+				FROM visits v
+					JOIN members m ON (m.id=v.memberID)
+				WHERE v.id=$visitDeleteID";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute();
+		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
+			return $results;
+		} else {
+			echo 'No Results';
+		}
+	}
+	public function deleteVisits($visitDeleteID) {
+		parent::getCredentials();
+		$sql = "DELETE FROM visits WHERE id=$visitDeleteID";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute();
+		if(!$results){
+			$message = "Record Not Deleted";
+		} else {
+			$message = 'Success';
+		}
+		return $message;
+	}
+	
+	public function distinctVisits($startDate, $endDate){
+		parent::getCredentials();
+		$sql = "SELECT DISTINCT date FROM visits WHERE date >= :startDate AND date <= :endDate";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute(array(':startDate'=>$startDate, ':endDate'=>$endDate));
+		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
+			return $results;
+		} else {
+			$message =  'No Results';
+			return $message;
+		}
+	}
 	function __destruct(){
 		$this->connection=null;
 	}
-	
 }
 
 class Accounts extends GoldenGate {
@@ -146,9 +244,49 @@ class Accounts extends GoldenGate {
 	public function getAccountSummary($startDate, $endDate, $memberID){
 		parent::getCredentials();
 		$sql = "SELECT * FROM memberAccounts
-		WHERE date >= :startDate AND date <= :endDate AND memberID = :memberID";
+		WHERE date >= :startDate AND date <= :endDate AND memberID = :memberID ORDER BY date DESC";
 		$stm = $this->connection->prepare($sql);
 		$results = $stm->execute(array(':startDate'=>$startDate, ':endDate'=>$endDate, ':memberID'=>$memberID));
+		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
+			return $results;
+		} else {
+			echo 'No Results';
+		}
+	}
+	public function getAccountRecords($startDate, $endDate) {
+		parent::getCredentials();
+		$sql = "SELECT * FROM memberAccounts WHERE date >= :startDate AND date <= :endDate";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute(array(':startDate'=>$startDate, ':endDate'=>$endDate));
+		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
+			return $results;
+		} else {
+			echo 'No Results';
+		}
+	}
+	public function getAccounts($startDate, $endDate) {
+		parent::getCredentials();
+		$sql = "SELECT a.id, a.date, a.amount, a.comments, m.FirstName, m.LastName
+				FROM memberAccounts a
+					JOIN members m ON (a.memberID = m.id)
+				WHERE date >= :startDate AND date <= :endDate
+				ORDER BY date DESC";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute(array(':startDate'=>$startDate, ':endDate'=>$endDate));
+		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
+			return $results;
+		} else {
+			echo 'No Results';
+		}
+	}
+	public function selectAccounts($AccountDeleteID) {
+		parent::getCredentials();
+		$sql = "SELECT a.id, a.date, a.amount, a.comments, m.FirstName, m.LastName
+				FROM memberAccounts a
+					JOIN members m ON (a.memberID = m.id)
+				WHERE a.id= $AccountDeleteID";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute();
 		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
 			return $results;
 		} else {
@@ -166,15 +304,30 @@ class Accounts extends GoldenGate {
 			echo 'No Results';
 		}
 	}
-	public function duesVisits($memberID, $startDate, $endDate) {
+	public function getAllAccountBalance(){
 		parent::getCredentials();
+		$sql = "SELECT m.FirstName, m.LastName, SUM(a.amount) as balance 
+				FROM memberAccounts a
+					JOIN members m ON (a.memberID = m.id)
+				GROUP BY m.LastName, m.id";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute();
+		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
+			return $results;
+		} else {
+			echo 'No Results';
+		}
+	}
+	public function duesVisits($memberID, $startDate, $endDate) {
+		$var = Dues::getVariables();
+		
 		$sql = "SELECT SUM(visits) as QtrVisits FROM visits WHERE memberID=:memberID AND date >= :startDate AND date <= :endDate";
 		$stm = $this->connection->prepare($sql);
 		$results = $stm->execute(array(':memberID'=>$memberID, ':startDate'=>$startDate, ':endDate'=>$endDate));
 		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
 			$visits = $results[0]['QtrVisits'];
-			if ($visits > 6) {
-				$duesVisits = 9.2*($visits-6);
+			if ($visits > $var['quarter']) {
+				$duesVisits = $var['price']*($visits-$var['quarter']);
 			}else {
 				$duesVisits = 0;
 			}
@@ -192,13 +345,14 @@ class Accounts extends GoldenGate {
 		}
 	}
 	public function setGuests($memberID, $startDate, $endDate) {
-		parent::getCredentials();
+		$var=Dues::getVariables();
+		
 		$sql = "SELECT COUNT(type) as Visitors FROM guests WHERE memberToBill=:memberID AND date >= :startDate AND date <= :endDate";
 		$stm = $this->connection->prepare($sql);
 		$results = $stm->execute(array(':memberID'=>$memberID, ':startDate'=>$startDate, ':endDate'=>$endDate));
 		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
 			$guests = $results[0]['Visitors'];
-			$duesGuests = 9.2*$guests;
+			$duesGuests = $var['price']*$guests;
 			if($duesGuests > 0){
 				$commentsGuests = "Meals for $guests Guests";
 				$sql2 = "INSERT INTO memberAccounts (memberID, date, amount, comments) VALUES (:memberID, NOW(), :duesGuests, :commentsGuests)";
@@ -212,7 +366,18 @@ class Accounts extends GoldenGate {
 			echo 'No Results';
 		}
 	}
-	
+	public function deleteAccount($AccountDeleteID) {
+		parent::getCredentials();
+		$sql = "DELETE FROM memberAccounts WHERE id=$AccountDeleteID";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute();
+		if(!$results){
+			$message = "Record Not Deleted";
+		} else {
+			$message = 'Success';
+		}
+		return $message;
+	}
 	function __destruct(){
 		$this->connection=null;
 	}
@@ -244,10 +409,49 @@ class Guests extends GoldenGate {
 			echo 'No Results';
 		}
 	}
+	public function getGuests($startDate, $endDate) {
+		parent::getCredentials();
+		$sql = "SELECT *
+				 FROM guests 
+				WHERE date >= :startDate AND date <= :endDate ORDER BY date DESC";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute(array(':startDate'=>$startDate, ':endDate'=>$endDate));
+		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
+			return $results;
+		} else {
+			echo 'No Results';
+		}
+	}
+	public function selectGuests($guestDeleteID) {
+		parent::getCredentials();
+		$sql = "SELECT * FROM guests WHERE id=$guestDeleteID";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute();
+		if($results = $stm->fetchAll(PDO::FETCH_ASSOC)){
+			return $results;
+		} else {
+			echo 'No Results';
+		}
+	}
+	public function deleteGuest($guestDeleteID) {
+		parent::getCredentials();
+		$sql = "DELETE FROM guests WHERE id=$guestDeleteID";
+		$stm = $this->connection->prepare($sql);
+		$results = $stm->execute();
+		if(!$results){
+			$message = "Record Not Deleted";
+		} else {
+			$message = 'Success';
+		}
+		return $message;
+	}
+	
 	function __destruct(){
 		$this->connection=null;
 	}
 }
+
+
 
 
 	?>
